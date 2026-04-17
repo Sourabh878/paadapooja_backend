@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 // Database
+
 const pool = require("./config/db");
 
 // Routes
@@ -33,6 +34,10 @@ const app = express();
 // ================== MIDDLEWARE ==================
 app.use(cors());
 app.use(express.json());
+
+app.get('/',(req,res)=>{
+  res.send('API is running...');
+});
 
 // ================== ROUTES ==================
 app.use("/api/auth", authRoutes);

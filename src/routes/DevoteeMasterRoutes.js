@@ -25,7 +25,7 @@ router.get("/", authenticate, async (req, res) => {
  * @route   POST /api/devotees
  * @desc    Register a new devotee with full location and religious details
  */
-router.post("/", authenticate, async (req, res) => {
+router.post("/", async (req, res) => {
   const {
     name,
     k_name,

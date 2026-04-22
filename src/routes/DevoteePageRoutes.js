@@ -107,12 +107,14 @@ router.post('/devotee', async (req, res) => {
 
         const result = await pool.query(query1, [mobile]);
 
+        console.log(result)
+
         // ✅ If booking exists
         if (result.rows.length > 0) {
             return res.json({
                 success: true,
                 alreadyBooked: true,
-                booking: result.rows[0],
+                booking: result.rows,
                 devotee: {
                     results:
                         devotee
@@ -312,27 +314,27 @@ router.get('/counts', async (req, res) => {
     try {
 
         const result1 = await pool.query(
-            'SELECT COUNT(*) AS total_sevas FROM dummy_seva_bookings'
+            'SELECT COUNT(*) AS total_sevas FROM dummy_seva_bookings where seva_date=CURRENT_DATE'
         );
 
         const result2 = await pool.query(
-            'SELECT COUNT(*) AS finished_sevas FROM dummy_seva_bookings WHERE status = 1'
+            'SELECT COUNT(*) AS finished_sevas FROM dummy_seva_bookings WHERE status = 1 AND seva_date=CURRENT_DATE'
         );
 
         const result4 = await pool.query(
-            "SELECT COUNT(*) AS total_p_pooja FROM dummy_seva_bookings WHERE seva_1 = 'Paadha Pooja'"
+            "SELECT COUNT(*) AS total_p_pooja FROM dummy_seva_bookings WHERE seva_1 = 'Paadha Pooja' AND seva_date=CURRENT_DATE"
         );
 
         const result5 = await pool.query(
-            "SELECT COUNT(*) AS finished_p_pooja FROM dummy_seva_bookings WHERE seva_1 = 'Paadha Pooja' AND status = 1"
+            "SELECT COUNT(*) AS finished_p_pooja FROM dummy_seva_bookings WHERE seva_1 = 'Paadha Pooja' AND status = 1 AND seva_date=CURRENT_DATE"
         );
 
         const result7 = await pool.query(
-            "SELECT COUNT(*) AS total_pan_pooja FROM dummy_seva_bookings WHERE seva_2 = 'Panchamruta'"
+            "SELECT COUNT(*) AS total_pan_pooja FROM dummy_seva_bookings WHERE seva_2 = 'Panchamruta' AND seva_date=CURRENT_DATE"
         );
 
         const result8 = await pool.query(
-            "SELECT COUNT(*) AS finished_pan_pooja FROM dummy_seva_bookings WHERE seva_2 = 'Panchamruta' AND status = 1"
+            "SELECT COUNT(*) AS finished_pan_pooja FROM dummy_seva_bookings WHERE seva_2 = 'Panchamruta' AND status = 1 AND seva_date=CURRENT_DATE"
         );
 
         // ✅ Final response object
@@ -367,6 +369,29 @@ router.get('/counts', async (req, res) => {
 });
 
 
+router.put('/status/:id', async (req, res) => {
+    const id = req.params.id;
+    const { status, value } = req.body; 
+  
+
+    try {
+        let query;
+
+        if (status === 1) {
+            query = `UPDATE dummy_seva_bookings SET status_1 = $1 WHERE id = $2 RETURNING *`;
+        } else if (status === 2) {
+            query = `UPDATE dummy_seva_bookings SET status_2 = $1 WHERE id = $2 RETURNING *`;
+        }
+
+        const result = await pool.query(query, [value, id]);
+
+        res.json({ success: true, data: result.rows[0] });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ error: "Update failed" });
+    }
+});
 
 module.exports = router;
 
